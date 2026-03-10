@@ -16,7 +16,7 @@ This project is a React-based interactive terminal portfolio that simulates a re
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/terminal-portfolio.git
+   git clone https://github.com/sathishk-dev/terminal-portfolio.git
    cd terminal-portfolio
    ```
 
