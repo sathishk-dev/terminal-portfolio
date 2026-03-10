@@ -202,7 +202,7 @@ export default function Terminal() {
       return;
     }
 
-    const trimmed = input.trim();
+    const trimmed = input?.trim()?.toLowerCase();
 
     if (trimmed === "sudo" || trimmed.startsWith("sudo ")) {
       setHistory(prev => [...prev, { command: trimmed, output: null, path: pathToString(currentPath) }]);
