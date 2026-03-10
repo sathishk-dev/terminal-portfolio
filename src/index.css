@@ -1,0 +1,188 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+@layer base {
+  :root {
+    --background: 215 28% 7%;
+    --foreground: 210 17% 82%;
+
+    --card: 215 25% 9%;
+    --card-foreground: 210 17% 82%;
+
+    --popover: 215 25% 9%;
+    --popover-foreground: 210 17% 82%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 215 20% 14%;
+    --secondary-foreground: 210 17% 82%;
+
+    --muted: 215 20% 14%;
+    --muted-foreground: 215 12% 50%;
+
+    --accent: 215 20% 14%;
+    --accent-foreground: 210 17% 82%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 215 20% 18%;
+    --input: 215 20% 18%;
+    --ring: 215 20% 30%;
+
+    --radius: 0.75rem;
+
+    --terminal-bg: 215 28% 7%;
+    --terminal-header: 215 25% 11%;
+    --terminal-green: 142 71% 55%;
+    --terminal-yellow: 48 96% 53%;
+    --terminal-red: 0 84% 60%;
+    --terminal-blue: 210 100% 66%;
+    --terminal-cyan: 187 80% 55%;
+    --terminal-magenta: 300 60% 65%;
+    --terminal-prompt: 142 71% 55%;
+    --terminal-cursor: 142 71% 55%;
+    --terminal-muted: 215 12% 42%;
+    --terminal-accent: 48 96% 53%;
+
+    --sidebar-background: 215 25% 9%;
+    --sidebar-foreground: 210 17% 82%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 215 20% 14%;
+    --sidebar-accent-foreground: 210 17% 82%;
+    --sidebar-border: 215 20% 18%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply text-[14px] sm:text-[16px];
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes glow {
+
+  0%,
+  100% {
+    text-shadow: 0 0 4px hsl(142 71% 55% / 0.3);
+  }
+
+  50% {
+    text-shadow: 0 0 10px hsl(142 71% 55% / 0.5);
+  }
+}
+
+.terminal-cursor {
+  animation: blink 1s step-end infinite;
+}
+
+.terminal-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes flicker-in {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+    filter: brightness(2) blur(1px);
+  }
+
+  30% {
+    opacity: 0.7;
+    filter: brightness(1.5) blur(0.5px);
+  }
+
+  50% {
+    opacity: 0.4;
+    filter: brightness(1.8);
+  }
+
+  70% {
+    opacity: 0.9;
+    filter: brightness(1.2);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: brightness(1) blur(0);
+  }
+}
+
+@keyframes scanline {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+.terminal-flicker {
+  animation: flicker-in 0.5s ease-out forwards;
+}
+
+.terminal-scanline::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 2px,
+      hsl(142 71% 55% / 0.015) 2px,
+      hsl(142 71% 55% / 0.015) 4px);
+  z-index: 1;
+}
+
+/* Custom Scrollbar for Terminal Theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+  border-left: 1px solid hsl(var(--border));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--terminal-green) / 0.3);
+  border: 1px solid hsl(var(--terminal-green) / 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--terminal-green) / 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: hsl(var(--background));
+}
