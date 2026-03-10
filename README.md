@@ -6,11 +6,14 @@ This project is a React-based interactive terminal portfolio that simulates a re
 
 ## ✨ Features
 
-- **💻 Interactive Command Line:** Navigate your portfolio using classic terminal commands (`help`, `whoami`, `experience`, `project`, `clear`).
+- **💻 Interactive Command Line:** Navigate your portfolio using classic terminal commands (`help`, `whoami`, `experience`, `project`, `skills`, `ls`, `history`, `clear`, `cat`/`nano`).
+- **🎨 Theme Switcher:** Change the color palette instantly with commands like `theme dracula` or `theme hacker`.
+- **📂 Virtual File System:** Experience realistic navigation with directory listing (`ls`) and file reading (`cat about.txt`).
+- **🕹️ Easter Eggs:** Toggle a falling ASCII Matrix code animation with the `matrix` command.
+- **⚡ Advanced Autocomplete:** Use the `Tab` key for smart command and file autocompletion (displays inline suggestions when multiple matches exist).
 - **📱 Fully Responsive:** Carefully crafted to look perfect on desktop, tablet, and mobile devices (with scaled-down typography for smaller screens).
-- **🎨 Hacker Aesthetics:** Features a subtle matrix-style cascading background, scanlines, and terminal glow effects for an immersive experience.
-- **⚡ Fast & Modern:** Built with React, Vite, TypeScript, and Tailwind CSS.
-- **🛠️ Easy to Customize:** All of the content (bio, projects, experience, education) is centralized in a single data file for effortless updates.
+- **🚀 Fast & Modern:** Built with React, Vite, TypeScript, and Tailwind CSS.
+- **🛠️ Easy to Customize:** All of the content (bio, projects, experience, education, skills) is centralized in a single data file for effortless updates.
 
 ## 🚀 Quick Start
 
@@ -51,11 +54,22 @@ export const profileData = {
   github: "github.com/yourusername",
   location: "Your City, Country",
   bio: "A brief description about who you are and what you do.",
-  skills: ["React", "TypeScript", "Node.js", "Python", "Docker"]
+  resume: "/resume.pdf" // Path to your downloadable resume
 };
 ```
 
-### 2. Experience Data (`experienceData`)
+### 2. Skills Data (`skills`)
+Add your technical skills and their proficiency percentages for the animated ASCII progress bar output.
+
+```typescript
+export const skills = [
+  { name: "JavaScript/TypeScript", percent: 95 },
+  { name: "React", percent: 90 },
+  // Add more skills...
+];
+```
+
+### 3. Experience Data (`experienceData`)
 Add your work history. Each object represents a different role.
 
 ```typescript
@@ -70,7 +84,7 @@ export const experienceData = [
 ];
 ```
 
-### 3. Education Data (`educationData`)
+### 4. Education Data (`educationData`)
 List your degrees, certifications, and educational background.
 
 ```typescript
@@ -85,8 +99,8 @@ export const educationData = [
 ];
 ```
 
-### 4. Projects Data (`projectsData`)
-Showcase your best work. Use `features` to highlight specific functionalities.
+### 5. Projects Data (`projectsData`)
+Showcase your best work. Use `features` to highlight specific functionalities, and `category` to group them when using `ls`.
 
 ```typescript
 export const projectsData = [
@@ -96,6 +110,7 @@ export const projectsData = [
     tech: "React • Node.js • MongoDB",
     desc: "A brief summary of what the project is.",
     details: "A more in-depth description shown when viewing the project details.",
+    category: "web", // For directory grouping in `ls`
     features: [
       "Feature one",
       "Feature two",
