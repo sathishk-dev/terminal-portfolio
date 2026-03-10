@@ -111,9 +111,4 @@ export const projectsData = [
 
 This project can be easily deployed to platforms like **Netlify**, **Vercel**, or **GitHub Pages**. Since it's built with Vite, simply set the build command to `npm run build` and the publish directory to `dist/`.
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. Feel free to use this template for your personal portfolio!
-
----
 *If you like this template, consider giving it a ⭐ on GitHub!*
