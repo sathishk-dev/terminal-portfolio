@@ -6,10 +6,11 @@ This project is a React-based interactive terminal portfolio that simulates a re
 
 ## ✨ Features
 
-- **💻 Interactive Command Line:** Navigate your portfolio using classic terminal commands (`help`, `whoami`, `experience`, `project`, `skills`, `ls`, `history`, `clear`, `cat`/`nano`).
+- **💻 Interactive Command Line:** Navigate your portfolio using classic terminal commands (`help`, `whoami`, `experience`, `project`, `skills`, `ls`, `tree`, `history`, `clear`, `cat`/`nano`).
 - **🎨 Theme Switcher:** Change the color palette instantly with commands like `theme dracula` or `theme hacker`.
-- **📂 Virtual File System:** Experience realistic navigation with directory listing (`ls`) and file reading (`cat about.txt`).
-- **🕹️ Easter Eggs:** Toggle a falling ASCII Matrix code animation with the `matrix` command.
+- **📂 Virtual File System:** Experience realistic navigation with directory listing (`ls`, `tree`) and file reading (`cat about.txt`).
+- **🕹️ Easter Eggs & Games:** Toggle a falling ASCII Matrix code animation with `matrix`, play mini-games like `play tictactoe` or `play snake`, and discover hidden troll commands like `rm -rf /` or `sudo`.
+- **✉️ Interactive Contact:** Send a message directly from the command line using the `contact` command.
 - **⚡ Advanced Autocomplete:** Use the `Tab` key for smart command and file autocompletion (displays inline suggestions when multiple matches exist).
 - **📱 Fully Responsive:** Carefully crafted to look perfect on desktop, tablet, and mobile devices (with scaled-down typography for smaller screens).
 - **🚀 Fast & Modern:** Built with React, Vite, TypeScript, and Tailwind CSS.
@@ -37,6 +38,22 @@ This project is a React-based interactive terminal portfolio that simulates a re
    ```bash
    npm run build
    ```
+
+## 🔐 Environment Variables
+
+To enable the interactive contact form, you need to set up a free account at [Formspree](https://formspree.io/) and get your Form ID.
+
+1. Create a `.env` file in the root directory:
+   ```bash
+   touch .env
+   ```
+
+2. Add your Formspree ID:
+   ```env
+   VITE_FORMSPREE_ID=your_form_id_here
+   ```
+
+*Note: If no ID is provided, it will default to the developer's test ID.*
 
 ## 🛠️ How to Customize (Make It Yours!)
 

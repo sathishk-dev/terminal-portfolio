@@ -4,7 +4,8 @@ import MatrixCanvas from "./terminal/MatrixCanvas";
 import { projects } from "./terminal/terminalData";
 import {
   helpOutput, projectsOutput, projectDetailOutput, infoOutput,
-  educationOutput, experienceOutput, errorOutput, welcomeMessage, themesOutput, skillsOutput, lsOutput, historyOutput
+  educationOutput, experienceOutput, errorOutput, welcomeMessage, themesOutput, skillsOutput, lsOutput, historyOutput,
+  timeOutput, neofetchOutput, PingOutput, TicTacToeOutput, SnakeGameOutput, treeOutput, ContactFormOutput, TrollOutput
 } from "./terminal/terminalOutputs";
 
 interface HistoryEntry {
@@ -37,7 +38,10 @@ function processCommand(
   if (cmd === "experience" || cmd === "experiense") return { output: experienceOutput(), newPath: ["experience.txt"] };
   if (cmd === "project" || cmd === "projects") return { output: projectsOutput(), newPath: ["projects"] };
   if (cmd === "ls") return { output: lsOutput(currentPath) };
+  if (cmd === "tree") return { output: treeOutput() };
   if (cmd === "history") return { output: historyOutput(commandHistory) };
+  if (cmd === "time") return { output: timeOutput() };
+  if (cmd === "neofetch") return { output: neofetchOutput() };
 
   if (cmd === "cd .." || cmd === "cd ../..") {
     if (currentPath.length === 0) {
@@ -101,6 +105,30 @@ function processCommand(
     return { output: <p className="text-terminal-green text-sm">Matrix illusion toggled.</p> };
   }
 
+  if (cmd.startsWith("ping ")) {
+    const host = cmd.split(" ")[1];
+    return { output: <PingOutput host={host} /> };
+  }
+  if (cmd === "ping") {
+    return { output: <p className="text-terminal-red text-sm">bash: ping: missing host operand</p> };
+  }
+
+  if (cmd === "play tictactoe" || cmd === "play tic-tac-toe" || cmd === "tictactoe") {
+    return { output: <TicTacToeOutput /> };
+  }
+  if (cmd === "play snake" || cmd === "snake") {
+    return { output: <SnakeGameOutput /> };
+  }
+  if (cmd === "play") {
+    return { output: <p className="text-terminal-red text-sm">bash: play: missing game name (allow: tictactoe, snake)</p> };
+  }
+
+  if (cmd.startsWith("rm") || cmd.startsWith("sudo rm")) {
+    return {
+      output: <TrollOutput />
+    };
+  }
+
   if (cmd.startsWith("cat ") || cmd.startsWith("nano ")) {
     const file = cmd.split(" ")[1]?.trim();
     if (!file) return { output: <p className="text-terminal-red text-sm">bash: {cmd.split(" ")[0]}: missing file operand</p> };
@@ -126,14 +154,14 @@ export default function Terminal() {
   const [currentPath, setCurrentPath] = useState<PathSegment[]>([]);
   const [theme, setTheme] = useState("default");
   const [matrixEnabled, setMatrixEnabled] = useState(false);
+  const [isSudoMode, setIsSudoMode] = useState(false);
+  const [isContactActive, setIsContactActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
-
-  const prompt = `sathishk-dev@portfolio:${pathToString(currentPath)}$`;
 
   const scrollToBottom = useCallback(() => {
     if (scrollRef.current) {
@@ -142,7 +170,11 @@ export default function Terminal() {
   }, []);
 
   useEffect(() => { scrollToBottom(); }, [history, scrollToBottom]);
-  useEffect(() => { inputRef.current?.focus(); }, []);
+  useEffect(() => {
+    if (!isContactActive) {
+      inputRef.current?.focus();
+    }
+  }, [isContactActive]);
 
   const syncCursor = () => {
     requestAnimationFrame(() => {
@@ -154,9 +186,32 @@ export default function Terminal() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() && !isSudoMode) return;
+
+    if (isSudoMode) {
+      if (input === "admin" || input === "hunter") {
+        setHistory(prev => [...prev, { command: "", output: <p className="text-terminal-green">Authentication successful. Overriding security protocols... Theme unlocked.</p>, path: "[sudo] password for visitor:" }]);
+        setTheme("hacker");
+        setMatrixEnabled(true);
+      } else {
+        setHistory(prev => [...prev, { command: "", output: <p className="text-terminal-red">Sorry, try again.</p>, path: "[sudo] password for visitor:" }]);
+      }
+      setIsSudoMode(false);
+      setInput("");
+      setCursorPos(0);
+      return;
+    }
 
     const trimmed = input.trim();
+
+    if (trimmed === "sudo" || trimmed.startsWith("sudo ")) {
+      setHistory(prev => [...prev, { command: trimmed, output: null, path: pathToString(currentPath) }]);
+      setIsSudoMode(true);
+      setInput("");
+      setCursorPos(0);
+      return;
+    }
+
     // commandHistory state update happens next render, so we pass the new array manually
     const newCommandHistory = [trimmed, ...commandHistory];
 
@@ -164,6 +219,18 @@ export default function Terminal() {
     setHistoryIndex(-1);
 
     const { output, clear, newPath } = processCommand(trimmed, currentPath, setTheme, setMatrixEnabled, newCommandHistory);
+
+    if (trimmed === "contact") {
+      setIsContactActive(true);
+      setHistory(prev => [...prev, {
+        command: trimmed,
+        output: <ContactFormOutput onClose={() => setIsContactActive(false)} />,
+        path: pathToString(currentPath)
+      }]);
+      setInput("");
+      setCursorPos(0);
+      return;
+    }
 
     if (clear) {
       setHistory([]);
@@ -204,7 +271,7 @@ export default function Terminal() {
       syncCursor();
     } else if (e.key === "Tab") {
       e.preventDefault();
-      const availableCommands = ["clear", "help", "/help", "whoami", "about", "skills", "education", "experience", "projects", "cd ..", "back", "theme", "matrix", "ls", "history", "cat", "nano"];
+      const availableCommands = ["clear", "help", "/help", "whoami", "about", "skills", "education", "experience", "projects", "cd ..", "back", "theme", "matrix", "ls", "tree", "history", "cat", "nano", "time", "neofetch", "ping", "sudo", "play tictactoe", "play snake", "contact"];
 
       if (input.startsWith("cd ")) {
         const partialProject = input.slice(3).toLowerCase();
@@ -264,7 +331,7 @@ export default function Terminal() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value.toLowerCase());
+    setInput(e.target.value); // Do not convert to lowercase for sudo password
     setCursorPos(e.target.selectionStart ?? e.target.value.length);
   };
 
@@ -278,6 +345,22 @@ export default function Terminal() {
       setCursorPos(inputRef.current.selectionStart ?? input.length);
     }
   };
+
+  const prompt = isSudoMode ? (
+    <span className="text-terminal-yellow">
+      [sudo] password for visitor:
+    </span>
+  ) : (
+    <div className="flex items-center gap-2 text-terminal-green inline-flex">
+      <span className="shrink-0 whitespace-nowrap">
+        <span className="text-terminal-cyan">visitor</span>@<span className="text-terminal-green">sathishk-dev</span>
+      </span>
+      <span className="text-foreground/80 shrink-0">
+        {pathToString(currentPath)}
+      </span>
+      <span className="text-terminal-accent shrink-0">$</span>
+    </div>
+  );
 
   return (
     <div
@@ -317,30 +400,33 @@ export default function Terminal() {
           </div>
         ))}
 
-        <form onSubmit={handleSubmit} className="relative text-sm break-all whitespace-pre-wrap">
-          <span className="text-terminal-prompt font-bold mr-2">{prompt}</span>
-          <span className="pointer-events-none text-foreground">
-            {input.slice(0, cursorPos)}
-            <span className="relative inline-block">
-              <span className="opacity-0">{input[cursorPos] || "\u00A0"}</span>
-              <span className="terminal-cursor absolute top-0 left-0 text-foreground">
-                ▌
+        {!isContactActive && (
+          <form onSubmit={handleSubmit} className="relative text-sm break-all whitespace-pre-wrap">
+            <span className="text-terminal-prompt font-bold mr-2">{prompt}</span>
+            <span className="pointer-events-none text-foreground">
+              {isSudoMode ? "•".repeat(input.slice(0, cursorPos).length) : input.slice(0, cursorPos)}
+              <span className="relative inline-block">
+                <span className="opacity-0">{input[cursorPos] || "\u00A0"}</span>
+                <span className={`terminal-cursor absolute top-0 left-0 ${isSudoMode ? 'text-transparent bg-foreground' : 'text-foreground'}`}>
+                  {isSudoMode ? "\u00A0" : "▌"}
+                </span>
               </span>
+              {isSudoMode ? "•".repeat(input.slice(cursorPos + 1).length) : input.slice(cursorPos + 1)}
             </span>
-            {input.slice(cursorPos + 1)}
-          </span>
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onKeyUp={syncCursor}
-            onSelect={handleSelect}
-            className="absolute top-0 left-0 w-full h-full opacity-0 outline-none cursor-text bg-transparent"
-            spellCheck={false}
-            autoComplete="off"
-          />
-        </form>
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              onKeyUp={syncCursor}
+              onSelect={handleSelect}
+              className="absolute top-0 left-0 w-full h-full opacity-0 outline-none cursor-text bg-transparent"
+              spellCheck={false}
+              autoComplete="off"
+              disabled={isContactActive}
+            />
+          </form>
+        )}
       </div>
       <div className="text-center py-1.5 text-[11px] md:text-xs text-foreground/40 bg-card/80 border-t border-border shrink-0">
         © 2026 Devfolio. Made with ❤️ by {' '}
