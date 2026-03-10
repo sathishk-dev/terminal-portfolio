@@ -160,7 +160,7 @@ export default function Terminal() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
+    setInput(e.target.value.toLowerCase());
     setCursorPos(e.target.selectionStart ?? e.target.value.length);
   };
 

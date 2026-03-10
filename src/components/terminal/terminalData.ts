@@ -7,8 +7,9 @@ export const profile = {
   email: "sathish31102004@gmail.com",
   github: "github.com/sathishk-dev",
   linkedin: "linkedin.com/in/sathishk-dev",
-  location: "Chennai, India",
+  location: "Chennai, Tamil Nadu, IN",
   bio: "Full-stack engineer with 5+ years crafting performant, scalable web applications. Passionate about developer tooling, open-source, and clean architecture.",
+  resume: "/resume.pdf",
 };
 
 export interface Project {
@@ -29,7 +30,7 @@ export const projects: Project[] = [
     desc: "Real-time cloud infrastructure monitoring dashboard with interactive visualizations.",
     details: "A comprehensive monitoring solution designed for DevOps teams to track cloud resource utilization, costs, and performance metrics in real-time.",
     features: ["Live resource utilization graphs", "Cost anomaly detection", "Multi-cloud support (AWS, GCP, Azure)", "Custom alert rules engine"],
-    link: "github.com/alexchen/cloudsync",
+    link: "github.com/yourusername/cloudsync",
   },
   {
     id: "devflow",
@@ -38,7 +39,7 @@ export const projects: Project[] = [
     desc: "A blazing-fast developer workflow automation tool for CI/CD pipelines.",
     details: "CLI tool that automates repetitive developer tasks like branch management, PR creation, and deployment workflows with intelligent defaults.",
     features: ["Parallel task execution", "Plugin architecture", "Git integration", "Template-based project scaffolding"],
-    link: "github.com/alexchen/devflow",
+    link: "github.com/yourusername/devflow",
   },
   {
     id: "pixelforge",
@@ -47,7 +48,7 @@ export const projects: Project[] = [
     desc: "SaaS platform for AI-powered image generation and editing.",
     details: "Full-featured SaaS application with subscription billing, team collaboration, and an AI pipeline for generating and editing images from text prompts.",
     features: ["Text-to-image generation", "Inpainting & outpainting", "Team workspaces", "Usage-based billing via Stripe"],
-    link: "github.com/alexchen/pixelforge",
+    link: "github.com/yourusername/pixelforge",
   },
   {
     id: "netpulse",
@@ -56,7 +57,7 @@ export const projects: Project[] = [
     desc: "Distributed network health monitoring system with alerting.",
     details: "Enterprise-grade network monitoring solution that uses distributed agents to collect metrics and detect anomalies across large-scale infrastructure.",
     features: ["Distributed agent architecture", "Custom Prometheus exporters", "PagerDuty & Slack integrations", "Auto-scaling on Kubernetes"],
-    link: "github.com/alexchen/netpulse",
+    link: "github.com/yourusername/netpulse",
   },
 ];
 

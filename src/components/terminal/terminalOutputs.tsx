@@ -1,4 +1,4 @@
-import { projects, education, certifications, experience, type Project } from "./terminalData";
+import { profile, projects, education, certifications, experience, type Project } from "./terminalData";
 
 const Flicker = ({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) => (
   <div className="terminal-flicker" style={{ animationDelay: `${delay}ms` }}>
@@ -88,20 +88,19 @@ export const infoOutput = () => (
     <div className="space-y-2 pl-2">
       <p className="text-terminal-accent font-bold">~/about</p>
       <div className="border border-border rounded-md p-4 bg-secondary/30 relative terminal-scanline overflow-hidden space-y-2">
-        <p className="text-terminal-cyan font-bold">Sathishkumar S</p>
+        <p className="text-terminal-cyan font-bold">{profile?.name}</p>
         <p className="text-foreground/70 text-sm">
-          Full-stack engineer with 5+ years crafting performant, scalable web applications.
-          Passionate about developer tooling, open-source, and clean architecture.
+          {profile?.bio}
         </p>
         <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm mt-3">
           <span className="text-terminal-muted">Email</span>
-          <a href="mailto:sathishk.dev@example.com" className="text-terminal-blue hover:underline cursor-pointer">sathishk.dev@example.com</a>
+          <a href={`mailto:${profile?.email}`} className="text-terminal-blue hover:underline cursor-pointer">{profile?.email}</a>
           <span className="text-terminal-muted">GitHub</span>
-          <a href="https://github.com/sathishk-dev" target="_blank" rel="noopener noreferrer" className="text-terminal-blue hover:underline cursor-pointer">github.com/sathishk-dev</a>
+          <a href={`https://${profile?.github}`} target="_blank" rel="noopener noreferrer" className="text-terminal-blue hover:underline cursor-pointer">{profile?.github}</a>
           <span className="text-terminal-muted">LinkedIn</span>
-          <a href="https://linkedin.com/in/sathishk-dev" target="_blank" rel="noopener noreferrer" className="text-terminal-blue hover:underline cursor-pointer">linkedin.com/in/sathishk-dev</a>
+          <a href={`https://${profile?.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-terminal-blue hover:underline cursor-pointer">{profile?.linkedin}</a>
           <span className="text-terminal-muted">Location</span>
-          <span className="text-foreground/70">Chennai, India</span>
+          <span className="text-foreground/70">{profile?.location}</span>
         </div>
       </div>
     </div>
@@ -165,16 +164,19 @@ export const errorOutput = (cmd: string) => (
 );
 
 export const welcomeMessage = () => (
-  <div className="space-y-1 text-sm">
-    <pre className="text-terminal-green text-xs leading-tight terminal-glow">{`
+  <div className="space-y-4 text-sm mt-2">
+    <div className="space-y-1">
+      <pre className="text-terminal-green text-xs leading-tight terminal-glow">{`
   ____             _____      _ _       
  |  _ \\  _____   _|  ___|__  | (_) ___  
  | | | |/ _ \\ \\ / / |_ / _ \\ | | |/ _ \\ 
  | |_| |  __/\\ V /|  _| (_) || | | (_) |
  |____/ \\___| \\_/ |_|  \\___/ |_|_|\\___/ 
 `}</pre>
-    <p className="text-foreground/70">
-      Welcome to my interactive portfolio. Type <span className="text-terminal-green">/help</span> to get started.
-    </p>
+      <p className="text-foreground/70 mt-2">
+        Welcome to my interactive portfolio. Here are the available commands to explore:
+      </p>
+    </div>
+    {helpOutput()}
   </div>
 );
