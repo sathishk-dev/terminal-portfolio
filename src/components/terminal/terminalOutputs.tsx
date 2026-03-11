@@ -560,9 +560,20 @@ export const TicTacToeOutput = ({ onClose }: { onClose?: () => void }) => {
   if (mode === 'select') {
     return (
       <div className={`pl-2 my-2 font-mono flex flex-col gap-3 ${closed ? 'opacity-70 transition-opacity' : ''}`}>
-        <div className="text-terminal-cyan font-bold flex justify-between w-full max-w-[350px]">
+        <div className="text-terminal-cyan font-bold flex items-center justify-between w-full max-w-[350px]">
           <span>Select Game Mode</span>
-          {!closed && <span className="text-[10px] opacity-50 font-normal italic">Ctrl+C to quit</span>}
+          {!closed && (
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] opacity-50 font-normal italic hidden sm:inline">Ctrl+C to quit</span>
+              <button 
+                onClick={handleClose}
+                className="text-[10px] text-terminal-red border border-terminal-red/50 px-1.5 py-0.5 hover:bg-terminal-red/20 transition-colors"
+                title="Exit Game"
+              >
+                Quit
+              </button>
+            </div>
+          )}
         </div>
         <p className="text-xs text-terminal-muted italic -mt-2">Use arrow keys or 1/2 to choose:</p>
         <button
@@ -607,7 +618,7 @@ export const TicTacToeOutput = ({ onClose }: { onClose?: () => void }) => {
 
   return (
     <div className={`pl-2 my-2 font-mono ${closed ? 'opacity-70 transition-opacity' : ''}`}>
-      <div className="flex items-center justify-between max-w-[200px] mb-2">
+      <div className="flex items-center justify-between w-full max-w-[350px] mb-2">
         <div className="flex items-center gap-4">
           <p className="text-terminal-muted text-sm">{status}</p>
           {!closed && (
@@ -619,7 +630,18 @@ export const TicTacToeOutput = ({ onClose }: { onClose?: () => void }) => {
             </button>
           )}
         </div>
-        {!closed && <span className="text-[10px] opacity-50 font-normal italic">Ctrl+C to quit</span>}
+        {!closed && (
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] opacity-50 font-normal italic hidden sm:inline">Ctrl+C to quit</span>
+            <button 
+              onClick={handleClose}
+              className="text-[10px] text-terminal-red border border-terminal-red/50 px-1.5 py-0.5 hover:bg-terminal-red/20 transition-colors"
+              title="Exit Game"
+            >
+              Quit
+            </button>
+          </div>
+        )}
       </div>
       <div className="inline-block border-2 border-terminal-green/80 p-0.5 bg-secondary/30">
         <div className="flex">
@@ -869,9 +891,20 @@ export const SnakeGameOutput = ({ onClose }: { onClose: () => void }) => {
         className={`pl-2 my-2 font-mono ${closed ? 'opacity-70' : ''}`}
         onClick={() => !closed && inputRef.current?.focus()}
       >
-        <div className="text-terminal-cyan font-semibold flex justify-between items-center mb-2 w-full pr-4">
-          {/* <span>-- Cloud Leaderboard Initialized --</span> */}
-          {!closed && <span className="text-[10px] opacity-50 font-normal italic">Ctrl+C or exit to quit</span>}
+        <div className="text-terminal-cyan font-semibold flex items-center justify-between mb-2 w-full pr-4">
+          <span></span>
+          {!closed && (
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] opacity-50 font-normal italic hidden sm:inline">Ctrl+C or exit to quit</span>
+              <button 
+                onClick={handleClose}
+                className="text-[10px] text-terminal-red border border-terminal-red/50 px-1.5 py-0.5 hover:bg-terminal-red/20 transition-colors"
+                title="Exit Game"
+              >
+                Quit
+              </button>
+            </div>
+          )}
         </div>
         <p className="text-terminal-muted text-xs mb-4 italic">Please enter your GitHub username to track your high score:</p>
 
@@ -900,9 +933,20 @@ export const SnakeGameOutput = ({ onClose }: { onClose: () => void }) => {
 
       {/* Top Bar: Controls & Leaderboard */}
       <div className="w-full max-w-[350px]">
-        <div className="text-terminal-cyan font-semibold italic flex justify-between items-center mb-2 w-full">
+        <div className="text-terminal-cyan font-semibold italic flex items-center justify-between mb-2 w-full pr-4 sm:pr-0">
           <span></span>
-          {!closed && <span className="text-[10px] opacity-50 font-normal">Ctrl+C to exit game</span>}
+          {!closed && (
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] opacity-50 font-normal hidden sm:inline">Ctrl+C to exit game</span>
+              <button 
+                onClick={handleClose}
+                className="text-[10px] text-terminal-red border border-terminal-red/50 px-1.5 py-0.5 hover:bg-terminal-red/20 transition-colors not-italic"
+                title="Exit Game"
+              >
+                Quit
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Leaderboard Area */}
@@ -1096,9 +1140,21 @@ export const ContactFormOutput = ({ onClose }: { onClose: () => void }) => {
         }
       }}
     >
-      <div className="text-terminal-cyan font-semibold italic flex justify-between items-center mr-4">
-        <span>-- Interactive Contact Protocol Initiated --</span>
-        {!closed && <span className="text-[10px] opacity-50 font-normal">Ctrl+C to exit</span>}
+      <div className="text-terminal-cyan font-semibold italic flex justify-between items-center mr-4 sm:mr-0 w-full max-w-[400px]">
+        <span className="truncate mr-2">-- Interactive Contact Protocol Initiated --</span>
+        {!closed && (
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-[10px] opacity-50 font-normal hidden sm:inline">Ctrl+C to exit</span>
+            <button 
+              onClick={handleClose}
+              type="button"
+              className="text-[10px] text-terminal-red border border-terminal-red/50 px-1.5 py-0.5 hover:bg-terminal-red/20 transition-colors not-italic"
+              title="Exit Contact Form"
+            >
+              Quit
+            </button>
+          </div>
+        )}
       </div>
 
       {step >= 1 && <div><span className="text-terminal-green">&gt; Enter your name:</span> {name}</div>}
