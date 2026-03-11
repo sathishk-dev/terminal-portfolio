@@ -1,5 +1,6 @@
 import { profile, projects, education, certifications, experience, skills, type Project } from "./terminalData";
 import { useEffect, useState, useRef, useCallback } from "react";
+import { supabase } from "../../lib/supabase";
 import { PathSegment } from "../Terminal";
 
 const Flicker = ({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) => (
@@ -421,9 +422,50 @@ export const PingOutput = ({ host }: { host: string }) => {
   );
 };
 
-export const TicTacToeOutput = () => {
+export const TicTacToeOutput = ({ onClose }: { onClose?: () => void }) => {
+  const [mode, setMode] = useState<'select' | 'pvp' | 'pve'>('select');
+  const [selectedIndex, setSelectedIndex] = useState<0 | 1>(0);
+  const [closed, setClosed] = useState(false);
   const [board, setBoard] = useState<(string | null)[]>(Array(9).fill(null));
   const [xIsNext, setXIsNext] = useState(true);
+
+  const handleClose = useCallback(() => {
+    setClosed(true);
+    if (onClose) onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (closed) return;
+      if (e.ctrlKey && (e.key.toLowerCase() === 'c' || e.key.toLowerCase() === 'q')) {
+        e.preventDefault();
+        handleClose();
+        return;
+      }
+
+      if (mode === 'select') {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setSelectedIndex(0);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setSelectedIndex(1);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          setMode(selectedIndex === 0 ? 'pvp' : 'pve');
+        } else if (e.key === '1') {
+          e.preventDefault();
+          setMode('pvp');
+        } else if (e.key === '2') {
+          e.preventDefault();
+          setMode('pve');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [closed, mode, selectedIndex, handleClose]);
 
   const calculateWinner = (squares: (string | null)[]) => {
     const lines = [
@@ -440,13 +482,108 @@ export const TicTacToeOutput = () => {
     return null;
   };
 
+  // Minimax Algorithm for unbeatable AI
+  const getBestMove = (squares: (string | null)[], depth: number, isMaximizing: boolean): number => {
+    const winner = calculateWinner(squares);
+    if (winner === 'O') return 10 - depth; // AI wins
+    if (winner === 'X') return depth - 10; // Human wins
+    if (squares.every(Boolean)) return 0;  // Draw
+
+    if (isMaximizing) {
+      let bestScore = -Infinity;
+      for (let i = 0; i < 9; i++) {
+        if (!squares[i]) {
+          squares[i] = 'O';
+          const score = getBestMove(squares, depth + 1, false);
+          squares[i] = null;
+          bestScore = Math.max(score, bestScore);
+        }
+      }
+      return bestScore;
+    } else {
+      let bestScore = Infinity;
+      for (let i = 0; i < 9; i++) {
+        if (!squares[i]) {
+          squares[i] = 'X';
+          const score = getBestMove(squares, depth + 1, true);
+          squares[i] = null;
+          bestScore = Math.min(score, bestScore);
+        }
+      }
+      return bestScore;
+    }
+  };
+
+  useEffect(() => {
+    if (mode === 'pve' && !xIsNext && !calculateWinner(board) && !board.every(Boolean)) {
+      // AI's turn
+      const timer = setTimeout(() => {
+        const newBoard = [...board];
+        let bestScore = -Infinity;
+        let move = -1;
+
+        // Find the best move
+        for (let i = 0; i < 9; i++) {
+          if (!newBoard[i]) {
+            newBoard[i] = 'O';
+            const score = getBestMove(newBoard, 0, false);
+            newBoard[i] = null;
+            if (score > bestScore) {
+              bestScore = score;
+              move = i;
+            }
+          }
+        }
+
+        if (move !== -1) {
+          newBoard[move] = 'O';
+          setBoard(newBoard);
+          setXIsNext(true);
+        }
+      }, 500); // Slight delay to feel like it's "thinking"
+
+      return () => clearTimeout(timer);
+    }
+  }, [xIsNext, board, mode, closed]);
+
   const handleClick = (i: number) => {
+    if (closed) return;
     if (board[i] || calculateWinner(board)) return;
+    if (mode === 'pve' && !xIsNext) return; // Prevent clicking during AI's turn
+
     const newBoard = [...board];
     newBoard[i] = xIsNext ? 'X' : 'O';
     setBoard(newBoard);
     setXIsNext(!xIsNext);
   };
+
+  if (mode === 'select') {
+    return (
+      <div className={`pl-2 my-2 font-mono flex flex-col gap-3 ${closed ? 'opacity-70 transition-opacity' : ''}`}>
+        <div className="text-terminal-cyan font-bold flex justify-between w-full max-w-[350px]">
+          <span>Select Game Mode</span>
+          {!closed && <span className="text-[10px] opacity-50 font-normal italic">Ctrl+C to quit</span>}
+        </div>
+        <p className="text-xs text-terminal-muted italic -mt-2">Use arrow keys or 1/2 to choose:</p>
+        <button
+          className={`text-left text-sm w-fit transition-all flex items-center gap-2 ${selectedIndex === 0 ? 'text-terminal-green scale-105 ml-2 font-bold' : 'text-terminal-muted hover:text-terminal-green'}`}
+          onClick={() => { if (!closed) { setSelectedIndex(0); setMode('pvp'); } }}
+          onMouseEnter={() => !closed && setSelectedIndex(0)}
+          disabled={closed}
+        >
+          {selectedIndex === 0 ? '> ' : '  '}[1] Play vs Friend (Local PvP)
+        </button>
+        <button
+          className={`text-left text-sm w-fit transition-all flex items-center gap-2 ${selectedIndex === 1 ? 'text-terminal-red scale-105 ml-2 font-bold' : 'text-terminal-muted hover:text-terminal-red'}`}
+          onClick={() => { if (!closed) { setSelectedIndex(1); setMode('pve'); } }}
+          onMouseEnter={() => !closed && setSelectedIndex(1)}
+          disabled={closed}
+        >
+          {selectedIndex === 1 ? '> ' : '  '}[2] Play vs Computer (Pro AI)
+        </button>
+      </div>
+    );
+  }
 
   const winner = calculateWinner(board);
   const isDraw = !winner && board.every(Boolean);
@@ -454,12 +591,13 @@ export const TicTacToeOutput = () => {
     ? `Winner: ${winner}`
     : isDraw
       ? "Draw!"
-      : `Next player: ${xIsNext ? 'X' : 'O'}`;
+      : `Next player: ${xIsNext ? 'X (You)' : mode === 'pve' ? 'O (Computer)' : 'O'}`;
 
   const renderSquare = (i: number) => (
     <button
-      className="w-12 h-12 border border-terminal-green/50 text-xl font-bold flex items-center justify-center hover:bg-terminal-green/20 transition-colors"
+      className={`w-12 h-12 border border-terminal-green/50 text-xl font-bold flex items-center justify-center transition-colors ${!board[i] && !(mode === 'pve' && !xIsNext) && !winner && !closed ? 'hover:bg-terminal-green/20' : ''}`}
       onClick={() => handleClick(i)}
+      disabled={closed || !!board[i] || !!winner || (mode === 'pve' && !xIsNext)}
     >
       <span className={board[i] === 'X' ? 'text-terminal-cyan' : 'text-terminal-yellow'}>
         {board[i]}
@@ -468,8 +606,21 @@ export const TicTacToeOutput = () => {
   );
 
   return (
-    <div className="pl-2 my-2 font-mono">
-      <p className="text-terminal-muted mb-2 text-sm">{status}</p>
+    <div className={`pl-2 my-2 font-mono ${closed ? 'opacity-70 transition-opacity' : ''}`}>
+      <div className="flex items-center justify-between max-w-[200px] mb-2">
+        <div className="flex items-center gap-4">
+          <p className="text-terminal-muted text-sm">{status}</p>
+          {!closed && (
+            <button
+              onClick={() => setMode('select')}
+              className="text-[10px] text-terminal-muted hover:text-terminal-cyan underline"
+            >
+              Change Mode
+            </button>
+          )}
+        </div>
+        {!closed && <span className="text-[10px] opacity-50 font-normal italic">Ctrl+C to quit</span>}
+      </div>
       <div className="inline-block border-2 border-terminal-green/80 p-0.5 bg-secondary/30">
         <div className="flex">
           {renderSquare(0)}{renderSquare(1)}{renderSquare(2)}
@@ -493,17 +644,127 @@ export const TicTacToeOutput = () => {
   );
 };
 
-export const SnakeGameOutput = () => {
+export const SnakeGameOutput = ({ onClose }: { onClose: () => void }) => {
   const GRID_SIZE = 15;
   const GAME_SPEED = 300; // Milliseconds per frame. Higher = Slower, Lower = Faster
+  const showLeaderboard = import.meta.env.VITE_SHOW_LEADERBOARD !== 'false';
   const [snake, setSnake] = useState([{ x: 7, y: 7 }]);
   const [food, setFood] = useState({ x: 10, y: 5 });
   const [gameOver, setGameOver] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
 
+  const [username, setUsername] = useState("");
+  const [isEnteringName, setIsEnteringName] = useState(showLeaderboard);
+  const [tempName, setTempName] = useState("");
+  const [leaderboard, setLeaderboard] = useState<{ username: string; score: number }[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [closed, setClosed] = useState(false);
+
   const dirRef = useRef({ x: 0, y: -1 });
   const lastDirRef = useRef({ x: 0, y: -1 });
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const fetchLeaderboard = useCallback(async () => {
+    if (!showLeaderboard || !supabase) return;
+    try {
+      const { data, error } = await supabase
+        .from('leaderboard')
+        .select('username, score')
+        .order('score', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+      if (data) setLeaderboard(data);
+    } catch (err) {
+      console.error('Error fetching leaderboard:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [fetchLeaderboard]);
+
+  const saveScore = async (finalScore: number) => {
+    if (!showLeaderboard || !username || finalScore === 0 || !supabase) return;
+    setIsSaving(true);
+    try {
+      const { data: existingUsers, error: fetchError } = await supabase
+        .from('leaderboard')
+        .select('score, id')
+        .eq('username', username)
+        .order('score', { ascending: false })
+        .limit(1);
+
+      if (fetchError) {
+        console.error('Error fetching user score:', fetchError);
+      }
+
+      const existingUser = existingUsers?.[0];
+
+      if (existingUser) {
+        if (finalScore > existingUser.score) {
+          const { error: updateError } = await supabase
+            .from('leaderboard')
+            .update({ score: finalScore, updated_at: new Date().toISOString() })
+            .eq('username', username);
+
+          if (updateError) throw updateError;
+        }
+      } else {
+        const { error: insertError } = await supabase
+          .from('leaderboard')
+          .insert([{ username, score: finalScore }]);
+
+        if (insertError) throw insertError;
+      }
+      await fetchLeaderboard();
+    } catch (err: any) {
+      console.error('Error saving score (Is RLS disabled in Supabase?):', err);
+      // If it's an RLS error, we'll log it clearly so the user knows
+      if (err.code === '42501' || err.message?.includes('row-level security') || err.status === 401) {
+        console.warn("SUPABASE RLS ERROR: You must disable Row Level Security (RLS) for the 'leaderboard' table in your Supabase dashboard to save scores.");
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleClose = useCallback(() => {
+    setClosed(true);
+    onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!closed && showLeaderboard && isEnteringName && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEnteringName, closed, showLeaderboard]);
+
+  const handleNameSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (closed) return;
+    const val = tempName.trim().toLowerCase();
+    if (val === "exit" || val === "quit" || val === "clear") {
+      handleClose();
+      return;
+    }
+    if (tempName.trim()) {
+      setUsername(tempName.trim());
+      setIsEnteringName(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (!closed && (e.ctrlKey && (e.key.toLowerCase() === 'c' || e.key.toLowerCase() === 'q'))) {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [closed, handleClose]);
 
   const startGame = () => {
     setSnake([{ x: 7, y: 7 }]);
@@ -519,7 +780,7 @@ export const SnakeGameOutput = () => {
   };
 
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || closed) return;
 
     const interval = setInterval(() => {
       setSnake(prev => {
@@ -533,6 +794,8 @@ export const SnakeGameOutput = () => {
           prev.some(s => s.x === newHead.x && s.y === newHead.y)) {
           setGameOver(true);
           setIsPlaying(false);
+          const finalScore = prev.length * 10 - 10;
+          saveScore(finalScore);
           return prev;
         }
 
@@ -556,11 +819,11 @@ export const SnakeGameOutput = () => {
       });
     }, GAME_SPEED);
     return () => clearInterval(interval);
-  }, [isPlaying, food]);
+  }, [isPlaying, food, closed, username]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isPlaying) return;
+      if (!isPlaying || closed) return;
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
       }
@@ -600,12 +863,86 @@ export const SnakeGameOutput = () => {
     grid.push(<div key={row} className="flex">{cols}</div>);
   }
 
+  if (showLeaderboard && isEnteringName) {
+    return (
+      <div
+        className={`pl-2 my-2 font-mono ${closed ? 'opacity-70' : ''}`}
+        onClick={() => !closed && inputRef.current?.focus()}
+      >
+        <div className="text-terminal-cyan font-semibold flex justify-between items-center mb-2 w-full pr-4">
+          {/* <span>-- Cloud Leaderboard Initialized --</span> */}
+          {!closed && <span className="text-[10px] opacity-50 font-normal italic">Ctrl+C or exit to quit</span>}
+        </div>
+        <p className="text-terminal-muted text-xs mb-4 italic">Please enter your GitHub username to track your high score:</p>
+
+        {!closed && (
+          <form onSubmit={handleNameSubmit} className="flex gap-2">
+            <span className="text-terminal-green text-xs md:text-sm">&gt; username:</span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={tempName}
+              onChange={(e) => setTempName(e.target.value)}
+              className="bg-transparent text-xs md:text-sm outline-none text-foreground border-none flex-1"
+              autoFocus
+              autoComplete="off"
+              spellCheck="false"
+              disabled={closed}
+            />
+          </form>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="pl-2 my-2 font-mono flex flex-col items-start gap-4">
+    <div className={`pl-2 my-2 font-mono flex flex-col items-start gap-4 ${closed ? 'opacity-70 transition-opacity' : ''}`}>
+
+      {/* Top Bar: Controls & Leaderboard */}
+      <div className="w-full max-w-[350px]">
+        <div className="text-terminal-cyan font-semibold italic flex justify-between items-center mb-2 w-full">
+          <span></span>
+          {!closed && <span className="text-[10px] opacity-50 font-normal">Ctrl+C to exit game</span>}
+        </div>
+
+        {/* Leaderboard Area */}
+        {showLeaderboard && (
+          <div className="border border-border/50 rounded-md p-3 bg-secondary/20 relative terminal-scanline shadow-inner mb-4">
+            <p className="text-terminal-accent font-bold text-xs mb-2 border-b border-border/30 pb-1">TOP 5 HUNTERS</p>
+            <div className="space-y-1">
+              {leaderboard.length === 0 ? (
+                <p className="text-xs text-terminal-muted animate-pulse italic">Scanning scores...</p>
+              ) : (
+                leaderboard.map((entry, i) => (
+                  <div key={entry.username} className="flex justify-between items-center text-xs group">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-4 font-bold ${i === 0 ? 'text-terminal-yellow' : 'text-terminal-muted'}`}>{i + 1}.</span>
+                      <a
+                        href={`https://github.com/${entry.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`hover:text-terminal-blue transition-colors ${entry.username === username ? 'text-terminal-green font-bold underline' : 'text-foreground/80'}`}
+                      >
+                        {entry.username}
+                      </a>
+                    </div>
+                    <span className="text-terminal-cyan font-mono">{entry.score}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Game Area */}
       <div className="relative">
         <div className="flex justify-between items-end mb-2">
-          <span className="text-terminal-muted">Score: <span className="text-terminal-cyan">{score}</span></span>
-          {(gameOver || !isPlaying) && (
+          <div className="flex flex-col">
+            {showLeaderboard && <span className="text-xs text-terminal-muted">Player: <span className="text-terminal-yellow">{username}</span></span>}
+            <span className="text-terminal-muted">Score: <span className="text-terminal-cyan">{score}</span></span>
+          </div>
+          {(gameOver || !isPlaying) && !closed && (
             <button
               onClick={startGame}
               className="text-xs bg-terminal-green/20 text-terminal-green px-2 py-1 hover:bg-terminal-green/40 border border-terminal-green/50 transition-colors"
@@ -617,13 +954,15 @@ export const SnakeGameOutput = () => {
         <div className="border-2 border-terminal-green/50 p-1 bg-secondary/10 relative shadow-[0_0_10px_rgba(0,0,0,0.5)]">
           {grid}
           {gameOver && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10 border border-terminal-red">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm z-10 border border-terminal-red">
               <span className="text-terminal-red font-bold text-lg animate-pulse">GAME OVER</span>
+              {isSaving && <span className="text-[10px] text-terminal-yellow mt-2 italic">Syncing score...</span>}
             </div>
           )}
         </div>
       </div>
 
+      {/* D-pad (Visible on all screens) */}
       <div className="flex flex-col items-center gap-1 w-[200px] mb-2 select-none">
         <button
           onClick={() => changeDir(0, -1)}

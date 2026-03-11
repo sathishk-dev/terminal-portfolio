@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ProfileHeader from "./terminal/ProfileHeader";
 import MatrixCanvas from "./terminal/MatrixCanvas";
-import { projects } from "./terminal/terminalData";
+import { projects, PROMPT } from "./terminal/terminalData";
 import {
   helpOutput, projectsOutput, projectDetailOutput, infoOutput,
   educationOutput, experienceOutput, errorOutput, welcomeMessage, themesOutput, skillsOutput, lsOutput, historyOutput,
@@ -113,12 +113,7 @@ function processCommand(
     return { output: <p className="text-terminal-red text-sm">bash: ping: missing host operand</p> };
   }
 
-  if (cmd === "play tictactoe" || cmd === "play tic-tac-toe" || cmd === "tictactoe") {
-    return { output: <TicTacToeOutput /> };
-  }
-  if (cmd === "play snake" || cmd === "snake") {
-    return { output: <SnakeGameOutput /> };
-  }
+
   if (cmd === "play") {
     return { output: <p className="text-terminal-red text-sm">bash: play: missing game name (allow: tictactoe, snake)</p> };
   }
@@ -156,6 +151,7 @@ export default function Terminal() {
   const [matrixEnabled, setMatrixEnabled] = useState(false);
   const [isSudoMode, setIsSudoMode] = useState(false);
   const [isContactActive, setIsContactActive] = useState(false);
+  const [isGameActive, setIsGameActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -171,10 +167,10 @@ export default function Terminal() {
 
   useEffect(() => { scrollToBottom(); }, [history, scrollToBottom]);
   useEffect(() => {
-    if (!isContactActive) {
+    if (!isContactActive && !isGameActive) {
       inputRef.current?.focus();
     }
-  }, [isContactActive]);
+  }, [isContactActive, isGameActive]);
 
   const syncCursor = () => {
     requestAnimationFrame(() => {
@@ -225,6 +221,30 @@ export default function Terminal() {
       setHistory(prev => [...prev, {
         command: trimmed,
         output: <ContactFormOutput onClose={() => setIsContactActive(false)} />,
+        path: pathToString(currentPath)
+      }]);
+      setInput("");
+      setCursorPos(0);
+      return;
+    }
+
+    if (trimmed === "play tictactoe" || trimmed === "play tic-tac-toe" || trimmed === "tictactoe") {
+      setIsGameActive(true);
+      setHistory(prev => [...prev, {
+        command: trimmed,
+        output: <TicTacToeOutput onClose={() => setIsGameActive(false)} />,
+        path: pathToString(currentPath)
+      }]);
+      setInput("");
+      setCursorPos(0);
+      return;
+    }
+
+    if (trimmed === "play snake" || trimmed === "snake") {
+      setIsGameActive(true);
+      setHistory(prev => [...prev, {
+        command: trimmed,
+        output: <SnakeGameOutput onClose={() => setIsGameActive(false)} />,
         path: pathToString(currentPath)
       }]);
       setInput("");
@@ -353,7 +373,7 @@ export default function Terminal() {
   ) : (
     <div className="flex items-center gap-2 text-terminal-green inline-flex">
       <span className="shrink-0 whitespace-nowrap">
-        <span className="text-terminal-cyan">visitor</span>@<span className="text-terminal-green">sathishk-dev</span>
+        <span className="text-terminal-cyan">{PROMPT.split("@")[0]}</span>@<span className="text-terminal-green">{PROMPT.split("@")[1]}</span>
       </span>
       <span className="text-foreground/80 shrink-0">
         {pathToString(currentPath)}
@@ -374,7 +394,7 @@ export default function Terminal() {
           <div className="w-3 h-3 rounded-full bg-terminal-green" />
         </div>
         <span className="text-terminal-muted text-xs ml-2 flex-1 text-center">
-          sathishk-dev@portfolio — bash
+          {PROMPT} — bash
         </span>
       </div>
 
@@ -400,7 +420,7 @@ export default function Terminal() {
           </div>
         ))}
 
-        {!isContactActive && (
+        {!isContactActive && !isGameActive && (
           <form onSubmit={handleSubmit} className="relative text-sm break-all whitespace-pre-wrap">
             <span className="text-terminal-prompt font-bold mr-2">{prompt}</span>
             <span className="pointer-events-none text-foreground">
@@ -423,7 +443,7 @@ export default function Terminal() {
               className="absolute top-0 left-0 w-full h-full opacity-0 outline-none cursor-text bg-transparent"
               spellCheck={false}
               autoComplete="off"
-              disabled={isContactActive}
+              disabled={isContactActive || isGameActive}
             />
           </form>
         )}

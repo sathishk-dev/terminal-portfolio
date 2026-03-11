@@ -6,10 +6,13 @@ This project is a React-based interactive terminal portfolio that simulates a re
 
 ## ✨ Features
 
-- **💻 Interactive Command Line:** Navigate your portfolio using classic terminal commands (`help`, `whoami`, `experience`, `project`, `skills`, `ls`, `tree`, `history`, `clear`, `cat`/`nano`).
+- **💻 Interactive Command Line:** Navigate your portfolio using classic terminal commands (`help`, `whoami`, `experience`, `projects`, `skills`, `ls`, `tree`, `history`, `clear`, `cat`/`nano`).
+- **🕹️ Native Mini-Games:**
+  - `play snake`: Classic Snake game with a dynamically toggleable **Global Cloud Leaderboard** to save high scores across all visitors.
+  - `play tictactoe`: Play against a friend locally or challenge the unbeatable **"Pro AI" (Minimax algorithm)**.
 - **🎨 Theme Switcher:** Change the color palette instantly with commands like `theme dracula` or `theme hacker`.
 - **📂 Virtual File System:** Experience realistic navigation with directory listing (`ls`, `tree`) and file reading (`cat about.txt`).
-- **🕹️ Easter Eggs & Games:** Toggle a falling ASCII Matrix code animation with `matrix`, play mini-games like `play tictactoe` or `play snake`, and discover hidden troll commands like `rm -rf /` or `sudo`.
+- **👾 Easter Eggs:** Toggle a falling ASCII Matrix code animation with `matrix` or discover hidden troll commands like `rm -rf /` or `sudo`.
 - **✉️ Interactive Contact:** Send a message directly from the command line using the `contact` command.
 - **⚡ Advanced Autocomplete:** Use the `Tab` key for smart command and file autocompletion (displays inline suggestions when multiple matches exist).
 - **📱 Fully Responsive:** Carefully crafted to look perfect on desktop, tablet, and mobile devices (with scaled-down typography for smaller screens).
@@ -41,19 +44,25 @@ This project is a React-based interactive terminal portfolio that simulates a re
 
 ## 🔐 Environment Variables
 
-To enable the interactive contact form, you need to set up a free account at [Formspree](https://formspree.io/) and get your Form ID.
+### 1. Contact Form (Formspree)
+To enable the interactive contact form, you need to set up a free account at [Formspree](https://formspree.io/) and get your Form ID. *If no ID is provided, it will default to the developer's test ID.*
 
-1. Create a `.env` file in the root directory:
-   ```bash
-   touch .env
-   ```
+### 2. Snake Game Global Leaderboard (Supabase) - *Optional*
+If you want the Snake game to have a global, cloud-saved "Top 5 Hunters" leaderboard, you can configure [Supabase](https://supabase.com/):
+1. Create a `leaderboard` table with columns: `id`, `username` (text), `score` (int), `created_at`, `updated_at`.
+2. Disable **Row Level Security (RLS)** for the `leaderboard` table.
+3. *If you don't want cloud saves, set `VITE_SHOW_LEADERBOARD=false`.* The game will gracefully fall back to a standard offline Snake game without asking for usernames!
 
-2. Add your Formspree ID:
-   ```env
-   VITE_FORMSPREE_ID=your_form_id_here
-   ```
+Create a `.env` file in the root directory and add your variables:
+```env
+# 1. Contact Form
+VITE_FORMSPREE_ID=your_form_id_here
 
-*Note: If no ID is provided, it will default to the developer's test ID.*
+# 2. Supabase Leaderboard Config
+VITE_SHOW_LEADERBOARD=true
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
+```
 
 ## 🛠️ How to Customize (Make It Yours!)
 

@@ -1,4 +1,4 @@
-export const PROMPT = "sathishk-dev@portfolio:~$";
+export const PROMPT = "sathishk-dev@portfolio:";
 
 export const profile = {
   avatar: "SK",
